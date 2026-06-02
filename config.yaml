@@ -1,0 +1,23 @@
+﻿paths:
+  raw: data/raw
+  gold: data/gold
+  segmented: data/segmented
+  jaat_outputs: data/jaat_outputs
+
+sampling:
+  full_size: 10000
+  eval_size: 300
+  seed: 42
+
+segmenters:
+  - base
+  - spacy
+  - sat
+  - ppl
+
+models:
+  gold_builder: claude-sonnet-4-6
+  llm_judge: claude-sonnet-4-6
+
+evaluation:
+  boundary_tolerance: 1

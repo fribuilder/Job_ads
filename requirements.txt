@@ -1,0 +1,11 @@
+﻿anthropic
+spacy
+wtpsplit
+torch
+transformers
+pyyaml
+pandas
+numpy
+scikit-learn
+jupyter
+tqdm
