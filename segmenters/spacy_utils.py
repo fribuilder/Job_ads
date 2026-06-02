@@ -22,6 +22,12 @@ _PARENTHETICAL = re.compile(
     r"\b(for example|i\.e\.?|e\.g\.?|for instance|namely)$", re.I
 )
 
+# Matches sentences where a label introduces the rest of the clause via a colon
+# (e.g. "Work Schedule: ...", "GS-5: Completion of ...").  These should not be
+# coordination-split because the conjuncts lack their own subject context.
+# Only trigger when the colon appears within the first ~50 characters.
+_LABEL_COLON_RE = re.compile(r"^[\w][\w /().-]{0,50}:\s")
+
 def _conj_root_dep(token) -> str:
     """Follow conj chain to find ultimate head's dep."""
     current = token
@@ -47,7 +53,9 @@ _SHARED_CONTEXT_DEPS = frozenset({
     "dobj",   # direct object - shares verb context
     "attr",   # attribute - shares copula
     "acomp",  # adjective complement
-    "xcomp",  # open clausal complement
+    # "xcomp" removed: open clausal complements in job ads often represent
+    # independent requirements ("Ability to plan AND to coordinate projects")
+    # and deserve their own segment when they have sufficient own structure.
     "appos",  # appositive
     "relcl",  # relative clause - shares head noun
     "acl",    # adjectival clause - shares head noun
@@ -127,7 +135,9 @@ def _find_valid_commas(sent) -> list[int]:
         has_own_structure = any(
             t.dep_ in (
                 "dobj", "nsubj", "prep", "attr", "ccomp",
-                "relcl", "advmod", "acl", "xcomp", "oprd"
+                "relcl", "advmod", "acl", "xcomp", "oprd",
+                "compound",   # compound noun heads (e.g. "health care system")
+                "npadvmod",   # noun used as adverbial modifier
             )
             for t in right.children
         )
@@ -150,7 +160,7 @@ def split_by_coordination(text: str, nlp) -> list[str]:
     Split a sentence on comma/conjunction boundaries using spaCy
     dependency relations to validate each split point.
     """
-    if ":" in text:
+    if _LABEL_COLON_RE.match(text):
         return [text]
 
     doc = nlp(text)
@@ -197,7 +207,7 @@ def split_by_coordination_detailed(text: str, nlp) -> list[dict]:
         Returns a single-element list when no split is made, so the caller
         always gets a non-empty list.
     """
-    if ":" in text:
+    if _LABEL_COLON_RE.match(text):
         return [{"text": text, "start": 0, "end": len(text), "type": "weak"}]
 
     doc = nlp(text)
