@@ -13,10 +13,12 @@ from __future__ import annotations
 
 from .spacy_segmenter import SpacySegmenter
 from .sat_segmenter import SatSegmenter
+from .hybrid_segmenter import HybridSegmenter
 
 SEGMENTER_REGISTRY: dict[str, dict] = {
-    "spacy": {"cls": SpacySegmenter, "eval_only": False},
-    "sat":   {"cls": SatSegmenter,   "eval_only": True},
+    "spacy":  {"cls": SpacySegmenter,  "eval_only": False},
+    "sat":    {"cls": SatSegmenter,    "eval_only": True},
+    "hybrid": {"cls": HybridSegmenter, "eval_only": True},
 }
 
-__all__ = ["SpacySegmenter", "SatSegmenter", "SEGMENTER_REGISTRY"]
+__all__ = ["SpacySegmenter", "SatSegmenter", "HybridSegmenter", "SEGMENTER_REGISTRY"]
